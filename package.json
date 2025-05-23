@@ -9,8 +9,10 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
-  "main": "./dist/extension.js",
+  "activationEvents": [
+  "*"
+],
+"main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
