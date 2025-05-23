@@ -2,10 +2,10 @@
   "name": "pain-compiler",
   "displayName": "Pain Compiler UH25",
   "publisher": "nohell",
-  "icon": "logo.webp",
+  "icon": "media/logo.webp",
   "description": "Schickt deine Coding-Fehler nach 5 Sekunden an einen Server, falls du sie nicht schnell genug reparierst. Schmerz inklusive.",
   "repository": "https://github.com/FIEF-nohell/pain-compiler-vsc",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.100.0"
   },
