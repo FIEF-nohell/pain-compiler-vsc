@@ -6,7 +6,7 @@ const sentErrors = new Set<ErrorKey>();
 let debounceTimer: NodeJS.Timeout | null = null;
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log("AAALAAAARRRMMMMM");
+	console.log("Pain compiler activated");
 
 	const sendDiagnosticErrors = (uris: vscode.Uri[]) => {
 		uris.forEach(uri => {
