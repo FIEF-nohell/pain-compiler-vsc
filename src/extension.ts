@@ -10,7 +10,7 @@ const apiUrl = config.get<string>("apiEndpoint") || "http://127.0.0.1:8000/trigg
 export function activate(context: vscode.ExtensionContext) {
 	console.log("Pain compiler activated");
 
-	const scheduleErrorSend = (uri: vscode.Uri, diag: vscode.Diagnostic) => {
+	const scheduleErrorSend = async (uri: vscode.Uri, diag: vscode.Diagnostic) => {
 		const errorKey: ErrorKey = `${uri.fsPath}:${diag.range.start.line}:${diag.range.start.character}:${diag.message}`;
 		console.log("🔍 Fehler gefunden:");
 		console.log(diag);
@@ -18,7 +18,15 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
-		const timeout = setTimeout(async () => {
+		const doc = await vscode.workspace.openTextDocument(uri);
+		const codeLine = doc.lineAt(diag.range.start.line).text.trim();
+
+		pregenerateError({
+			code: codeLine,
+			message: diag.message
+		});
+
+		const timeout = setTimeout(() => {
 			const currentDiagnostics = vscode.languages.getDiagnostics(uri);
 			const stillExists = currentDiagnostics.some(d =>
 				d.range.start.line === diag.range.start.line &&
@@ -27,8 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
 			);
 
 			if (stillExists) {
-				const doc = await vscode.workspace.openTextDocument(uri);
-				const codeLine = doc.lineAt(diag.range.start.line).text.trim();
+
 				console.log("📤 Fehler noch da, wird gesendet:", errorKey);
 				sendErrorToAPI({
 					code: codeLine,
@@ -77,7 +84,23 @@ async function sendErrorToAPI(error: {
 }) {
 	try {
 		console.log("📤 Senden:", error);
-		await fetch(apiUrl, {
+		await fetch(apiUrl + "/trigger", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(error)
+		});
+	} catch (e) {
+		console.error("❌ Fehler beim Senden:", e);
+	}
+}
+
+async function pregenerateError(error: {
+	code: string;
+	message: string;
+}) {
+	try {
+		console.log("📤 Senden:", error);
+		await fetch(apiUrl + "/pregenerate", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(error)
