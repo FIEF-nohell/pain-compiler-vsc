@@ -1,6 +1,4 @@
-### 📄 `README.md`
 
-````markdown
 # 🛠 pain-compiler
 
 VS Code Extension, die automatisch Compiler-Fehler erkennt und an eine API sendet – mit 5 Sekunden Bedenkzeit 😈
