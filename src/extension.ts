@@ -5,7 +5,7 @@ const sentErrors = new Set<ErrorKey>();
 const pendingErrors = new Map<ErrorKey, NodeJS.Timeout>();
 const config = vscode.workspace.getConfiguration("painCompiler");
 const madness = config.get<number>("madness") || 0;
-const apiUrl = config.get<string>("apiEndpoint") || "http://127.0.0.1:5000/errors";
+const apiUrl = config.get<string>("apiEndpoint") || "http://127.0.0.1:8000/trigger";
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log("Pain compiler activated");
@@ -14,12 +14,11 @@ export function activate(context: vscode.ExtensionContext) {
 		const errorKey: ErrorKey = `${uri.fsPath}:${diag.range.start.line}:${diag.range.start.character}:${diag.message}`;
 		console.log("🔍 Fehler gefunden:");
 		console.log(diag);
-
 		if (sentErrors.has(errorKey) || pendingErrors.has(errorKey)) {
 			return;
 		}
 
-		const timeout = setTimeout(() => {
+		const timeout = setTimeout(async () => {
 			const currentDiagnostics = vscode.languages.getDiagnostics(uri);
 			const stillExists = currentDiagnostics.some(d =>
 				d.range.start.line === diag.range.start.line &&
@@ -28,13 +27,12 @@ export function activate(context: vscode.ExtensionContext) {
 			);
 
 			if (stillExists) {
+				const doc = await vscode.workspace.openTextDocument(uri);
+				const codeLine = doc.lineAt(diag.range.start.line).text.trim();
 				console.log("📤 Fehler noch da, wird gesendet:", errorKey);
 				sendErrorToAPI({
-					message: diag.message,
-					file: uri.fsPath,
-					line: diag.range.start.line + 1,
-					column: diag.range.start.character + 1,
-					timestamp: new Date().toISOString()
+					code: codeLine,
+					message: diag.message
 				});
 				sentErrors.add(errorKey);
 			} else {
@@ -74,11 +72,8 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 async function sendErrorToAPI(error: {
+	code: string;
 	message: string;
-	file: string;
-	line: number;
-	column: number;
-	timestamp: string;
 }) {
 	try {
 		console.log("📤 Senden:", error);
