@@ -19,7 +19,6 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 }
 
-
 async function sendErrorToAPI(error: {
 	message: string;
 	file: string;
@@ -28,7 +27,7 @@ async function sendErrorToAPI(error: {
 	timestamp: string;
 }) {
 	try {
-		await fetch("https://deine-api.com/errors", {
+		await fetch("http://127.0.0.1:5000/errors", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(error)
