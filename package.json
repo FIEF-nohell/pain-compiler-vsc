@@ -2,6 +2,7 @@
   "name": "pain-compiler",
   "displayName": "pain-compiler",
   "description": "",
+  "repository": "https://github.com/FIEF-nohell/pain-compiler-vsc",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.100.0"
@@ -22,7 +23,7 @@
     ]
   },
   "scripts": {
-    "serve": "yarn compile ",
+    "build": "yarn compile && vsce package --allow-star-activation",
     "vscode:prepublish": "yarn run package",
     "compile": "yarn run check-types && yarn run lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
