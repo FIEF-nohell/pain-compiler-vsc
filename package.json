@@ -2,10 +2,10 @@
   "name": "pain-compiler",
   "displayName": "Pain Compiler UH25",
   "publisher": "nohell",
-  "icon": "logo.png",
-  "description": "",
+  "icon": "logo.webp",
+  "description": "Schickt deine Coding-Fehler nach 5 Sekunden an einen Server, falls du sie nicht schnell genug reparierst. Schmerz inklusive.",
   "repository": "https://github.com/FIEF-nohell/pain-compiler-vsc",
-  "version": "0.0.5",
+  "version": "0.0.8",
   "engines": {
     "vscode": "^1.100.0"
   },
@@ -17,12 +17,27 @@
 ],
 "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "pain-compiler.helloWorld",
-        "title": "Hello World"
+    "configuration": {
+      "type": "object",
+      "title": "Pain Compiler Settings",
+      "properties": {
+        "painCompiler.apiEndpoint": {
+          "type": "string",
+          "default": "http://127.0.0.1:5000/errors",
+          "description": "API-Adresse, an die Fehler gesendet werden"
+        },
+        "painCompiler.madness": {
+          "type": "number",
+          "default": 0,
+          "description": "0: Nur Fehler, 1: Fehler und Warnungen, 2: Fehler, Warnungen und Hinweise"
+        },
+        "painCompiler.enableDebugLog": {
+          "type": "boolean",
+          "default": false,
+          "description": "Aktiviere zusätzliche Debug-Ausgaben in der Konsole"
+        }
       }
-    ]
+    }
   },
   "scripts": {
     "build": "yarn compile && vsce package --allow-star-activation",

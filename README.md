@@ -34,7 +34,7 @@ yarn build
 1. Öffne **VS Code**
 2. Öffne die **Command Palette** (`Ctrl+Shift+P`)
 3. Wähle **"Extensions: Install from VSIX..."**
-4. Wähle die Datei `pain-compiler-0.0.1.vsix`
+4. Wähle die Datei `pain-compiler-x.x.x.vsix`
 5. Die Extension erscheint dann in der Extensions-Leiste (Ctrl+Shift+X)
 
 ---

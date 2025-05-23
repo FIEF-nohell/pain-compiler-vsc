@@ -3,6 +3,9 @@ import * as vscode from 'vscode';
 type ErrorKey = string;
 const sentErrors = new Set<ErrorKey>();
 const pendingErrors = new Map<ErrorKey, NodeJS.Timeout>();
+const config = vscode.workspace.getConfiguration("painCompiler");
+const madness = config.get<number>("madness") || 0;
+const apiUrl = config.get<string>("apiEndpoint") || "http://127.0.0.1:5000/errors";
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log("Pain compiler activated");
@@ -44,20 +47,26 @@ export function activate(context: vscode.ExtensionContext) {
 		pendingErrors.set(errorKey, timeout);
 	};
 
-	/* 
-	Severity Levels:
-		- Error: 0
-		- Warning: 1
-		- Information: 2	
-		- Hint: 3
-	*/
-
 	vscode.languages.onDidChangeDiagnostics((e) => {
 		e.uris.forEach(uri => {
 			const diagnostics = vscode.languages.getDiagnostics(uri);
 			diagnostics.forEach(diag => {
-				if (diag.severity === 0) {
-					scheduleErrorSend(uri, diag);
+				switch (madness) {
+					case 1:
+						if (diag.severity === 0 || diag.severity === 1) {
+							scheduleErrorSend(uri, diag);
+						}
+						break;
+					case 2:
+						if (diag.severity === 0 || diag.severity === 1 || diag.severity === 2) {
+							scheduleErrorSend(uri, diag);
+						}
+						break;
+					default:
+						if (diag.severity === 0) {
+							scheduleErrorSend(uri, diag);
+						}
+						break;
 				}
 			});
 		});
@@ -73,7 +82,7 @@ async function sendErrorToAPI(error: {
 }) {
 	try {
 		console.log("📤 Senden:", error);
-		await fetch("http://127.0.0.1:5000/errors", {
+		await fetch(apiUrl, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(error)
