@@ -44,11 +44,21 @@ export function activate(context: vscode.ExtensionContext) {
 		pendingErrors.set(errorKey, timeout);
 	};
 
+	/* 
+	Severity Levels:
+		- Error: 0
+		- Warning: 1
+		- Information: 2	
+		- Hint: 3
+	*/
+
 	vscode.languages.onDidChangeDiagnostics((e) => {
 		e.uris.forEach(uri => {
 			const diagnostics = vscode.languages.getDiagnostics(uri);
 			diagnostics.forEach(diag => {
-				scheduleErrorSend(uri, diag);
+				if (diag.severity === 0) {
+					scheduleErrorSend(uri, diag);
+				}
 			});
 		});
 	});

@@ -1,9 +1,11 @@
 {
   "name": "pain-compiler",
-  "displayName": "pain-compiler",
+  "displayName": "Pain Compiler UH25",
+  "publisher": "nohell",
+  "icon": "logo.png",
   "description": "",
   "repository": "https://github.com/FIEF-nohell/pain-compiler-vsc",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "engines": {
     "vscode": "^1.100.0"
   },
