@@ -2,35 +2,57 @@ import * as vscode from 'vscode';
 
 type ErrorKey = string;
 const sentErrors = new Set<ErrorKey>();
-
-let debounceTimer: NodeJS.Timeout | null = null;
+const pendingErrors = new Map<ErrorKey, NodeJS.Timeout>();
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log("Pain compiler activated");
 
-	const sendDiagnosticErrors = (uris: vscode.Uri[]) => {
-		uris.forEach(uri => {
-			const diagnostics = vscode.languages.getDiagnostics(uri);
-			console.log("🛠️ Diagnose:", uri.fsPath, diagnostics);
-			diagnostics.forEach(diag => {
-				const errorKey = `${uri.fsPath}:${diag.range.start.line}:${diag.range.start.character}:${diag.message}`;
-				if (!sentErrors.has(errorKey)) {
-					sendErrorToAPI({
-						message: diag.message,
-						file: uri.fsPath,
-						line: diag.range.start.line + 1,
-						column: diag.range.start.character + 1,
-						timestamp: new Date().toISOString()
-					});
-					sentErrors.add(errorKey);
-				}
-			});
-		});
+	const scheduleErrorSend = (uri: vscode.Uri, diag: vscode.Diagnostic) => {
+		const errorKey: ErrorKey = `${uri.fsPath}:${diag.range.start.line}:${diag.range.start.character}:${diag.message}`;
+
+		if (sentErrors.has(errorKey) || pendingErrors.has(errorKey)) {
+			return;
+		}
+
+		const timeout = setTimeout(() => {
+			const currentDiagnostics = vscode.languages.getDiagnostics(uri);
+			const stillExists = currentDiagnostics.some(d =>
+				d.severity === vscode.DiagnosticSeverity.Error &&
+				d.range.start.line === diag.range.start.line &&
+				d.range.start.character === diag.range.start.character &&
+				d.message === diag.message
+			);
+
+			if (stillExists) {
+				console.log("📤 Fehler noch da, wird gesendet:", errorKey);
+				sendErrorToAPI({
+					message: diag.message,
+					file: uri.fsPath,
+					line: diag.range.start.line + 1,
+					column: diag.range.start.character + 1,
+					timestamp: new Date().toISOString()
+				});
+				sentErrors.add(errorKey);
+			} else {
+				console.log("✅ Fehler wurde rechtzeitig behoben:", errorKey);
+			}
+
+			pendingErrors.delete(errorKey);
+		}, 5000);
+
+		pendingErrors.set(errorKey, timeout);
 	};
 
 	vscode.languages.onDidChangeDiagnostics((e) => {
-		console.log("🛠️ Änderung erkannt:", e.uris.map(uri => uri.fsPath));
-		sendDiagnosticErrors([...e.uris]);
+		console.log("🛠️ Fehleränderung erkannt:", e.uris.map(uri => uri.fsPath));
+		e.uris.forEach(uri => {
+			const diagnostics = vscode.languages.getDiagnostics(uri);
+			diagnostics.forEach(diag => {
+				if (diag.severity === vscode.DiagnosticSeverity.Error) {
+					scheduleErrorSend(uri, diag);
+				}
+			});
+		});
 	});
 }
 

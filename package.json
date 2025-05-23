@@ -22,6 +22,7 @@
     ]
   },
   "scripts": {
+    "serve": "yarn compile ",
     "vscode:prepublish": "yarn run package",
     "compile": "yarn run check-types && yarn run lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
