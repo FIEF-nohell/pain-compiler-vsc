@@ -6,8 +6,8 @@ VS Code Extension, die automatisch Compiler-Fehler erkennt und an eine API sende
 ## 🔧 Setup
 
 ```bash
-yarn install
-````
+yarn
+```
 
 ## 🚀 Entwicklung & Nutzung
 
