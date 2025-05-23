@@ -9,6 +9,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const scheduleErrorSend = (uri: vscode.Uri, diag: vscode.Diagnostic) => {
 		const errorKey: ErrorKey = `${uri.fsPath}:${diag.range.start.line}:${diag.range.start.character}:${diag.message}`;
+		console.log("🔍 Fehler gefunden:");
+		console.log(diag);
 
 		if (sentErrors.has(errorKey) || pendingErrors.has(errorKey)) {
 			return;
@@ -17,7 +19,6 @@ export function activate(context: vscode.ExtensionContext) {
 		const timeout = setTimeout(() => {
 			const currentDiagnostics = vscode.languages.getDiagnostics(uri);
 			const stillExists = currentDiagnostics.some(d =>
-				d.severity === vscode.DiagnosticSeverity.Error &&
 				d.range.start.line === diag.range.start.line &&
 				d.range.start.character === diag.range.start.character &&
 				d.message === diag.message
@@ -44,13 +45,10 @@ export function activate(context: vscode.ExtensionContext) {
 	};
 
 	vscode.languages.onDidChangeDiagnostics((e) => {
-		console.log("🛠️ Fehleränderung erkannt:", e.uris.map(uri => uri.fsPath));
 		e.uris.forEach(uri => {
 			const diagnostics = vscode.languages.getDiagnostics(uri);
 			diagnostics.forEach(diag => {
-				if (diag.severity === vscode.DiagnosticSeverity.Error) {
-					scheduleErrorSend(uri, diag);
-				}
+				scheduleErrorSend(uri, diag);
 			});
 		});
 	});
