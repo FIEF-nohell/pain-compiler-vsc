@@ -252,6 +252,28 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(challengeCommand);
+
+	let idleTimer: NodeJS.Timeout | undefined;
+
+	function resetIdleTimer() {
+		if (idleTimer) {
+			clearTimeout(idleTimer);
+		}
+		idleTimer = setTimeout(() => {
+			console.log("😴 10 Sekunden Inaktivität – Trigger wird ausgelöst.");
+			fetch(apiUrl + "/inactivity-trigger", { method: "POST" })
+				.then(() => console.log("📡 Idle-Trigger erfolgreich gesendet."))
+				.catch((err) => console.error("❌ Fehler beim Senden des Idle-Triggers:", err));
+		}, 10000);
+	}
+
+	// Trigger bei typischer Benutzeraktivität im Editor
+	vscode.workspace.onDidChangeTextDocument(() => resetIdleTimer());
+	vscode.window.onDidChangeTextEditorSelection(() => resetIdleTimer());
+	vscode.window.onDidChangeActiveTextEditor(() => resetIdleTimer());
+
+	// Optional beim Start initial setzen
+	resetIdleTimer();
 }
 
 // Helper für API-Senden
