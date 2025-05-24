@@ -5,7 +5,7 @@
   "icon": "media/logo.webp",
   "description": "Schickt deine Coding-Fehler nach 5 Sekunden an einen Server, falls du sie nicht schnell genug reparierst. Schmerz inklusive.",
   "repository": "https://github.com/FIEF-nohell/pain-compiler-vsc",
-  "version": "0.1.4",
+  "version": "0.2.1",
   "engines": {
     "vscode": "^1.100.0"
   },
@@ -17,6 +17,11 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "commands": [
+    {
+      "command": "painCompiler.runChallenge",
+      "title": "🧩 Starte Coding-Challenge"
+    }],
     "configuration": {
       "type": "object",
       "title": "Pain Compiler Settings",
